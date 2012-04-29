@@ -1,5 +1,7 @@
 <ul class="pills" style="margin-bottom: 0px;">
   <% @interval_filters.each do |options| %>
-  <li<%= ' class="active"' if options[:from] == @dashboard.graph_from %>><%= link_to_interval(options) %></li>
+  <li<%= ' class="active"' if options[:from] == @dashboard.graph_from %>><%= link_to_interval(options) %>
+
+</li>
   <% end %>
 </ul>

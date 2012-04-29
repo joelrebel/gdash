@@ -3,6 +3,7 @@
 <div class="row">
     <table>
         <% row = 1 %>
+	<% puts @graphs.inspect %>
         <% @graphs.in_groups_of(@graph_columns) do |graphrows| %>
           <tr>
           <% graphrows.each do |graph| %>

@@ -16,23 +16,49 @@
             <div class="topbar" data-dropdown="dropdown" >
                 <div class="topbar-inner">
                     <div class="container">
+		       <% if params.empty? %>
+			 <%= host = @hosts[0] %>
+			<% end %>
                         <h3><a href="<%= @prefix %>/"><%= @dash_title %></a></h3>
+
                         <ul class="nav">
-                        <% @top_level.keys.sort.each do |category| %>
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle"><%= category.capitalize %></a>
-                                <ul class="dropdown-menu">
-                                <% @top_level[category].dashboards.sort_by{|b| b[:name]}.each do |board| %>
-                                    <li><a href="<%= [@prefix, category, board[:link]].join('/') %>/"><%= board[:name] %></a></li>
+			  <li class="dropdown">
+			   <a href="#" class="dropdown-toggle">select host</a>
+			   <ul class="dropdown-menu">
+			   <% @hosts.each do |host| %>
+			   	<% if ( params[:category] && params[:dash] ) %> 
+			  		<li><a href="<%= [@prefix, params[:category], params[:dash], host].join('/') %>/"><%= host %></a></li>
+				<% else %>
+			  		<li><a href="/<%= host %>"><%= host %></a></li>
+				<% end %>
+			   <% end %>	
+			   </ul>
+			  </li> 
+
+                          <% @top_level.keys.sort.each do |category| %>
+                          <li class="dropdown">
+                            <a href="#" class="dropdown-toggle"><%= category %></a>
+                            <ul class="dropdown-menu">
+			    <% @top_level[category].dashboards.sort_by{|b| b[:name]}.each do |board| %>
+			    	<% if !params[:host] %>
+                            		<li><a href="<%= [@prefix, category, board[:link] ].join('/') %>/"><%= board[:name] %></a></li>
+				<% else %>
+                                	<li><a href="<%= [@prefix, category, board[:link], params[:host] ].join('/') %>/"><%= board[:name] %></a></li>
                                 <% end %>
-                                </ul>
-                            </li>
-                        <% end %>
+
+			<% end %>
+                            </ul>
+			    
+			  <% end %>
                         </ul>
+
                         <ul class="nav secondary-nav">
                             <li><a href="<%= @graphite_base %>">Data Browser</a></li>
                             <li><a href="<%= @prefix %>/docs/">Docs</a></li>
                         </ul>
+
+		
+
                     </div>
                 </div>
             </div>

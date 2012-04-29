@@ -10,13 +10,18 @@
         <% graphs.each do |graph| %>
             <% i = grouped_graphs.rindex(graphs) * @graph_columns + graphs.rindex(graph) %>
             <td>
-            <% if graph %>
+	    <% if graph %>
+	        <%= graph_url = graph[:graphite][:url].gsub(/\$HOST/, params[:host]) %>
                 <% if graph[:graphite][:description] %>
                     <a href='<%= [@prefix, params[:category], @params[:dash], 'details', i].join "/" %>'>
-                    <img src='<%= [@top_level[@params[:category]].graphite_render, graph[:graphite][:url]].join "?" %>' rel="<%= row == 1 ? 'popover-below' : 'popover-above' %>" title="<%= graph[:graphite][:title] %>" data-content="<%= graph[:graphite][:description] %>"></a>
+
+                    <img src='<%= [@top_level[@params[:category]].graphite_render, graph_url].join "?" %>' rel="<%= row == 1 ? 'popover-below' : 'popover-above' %>" title="<%= graph[:graphite][:title] %>" data-content="<%= graph[:graphite][:description] %>"></a>
                 <% else %>
                     <a href='<%= [@prefix, params[:category], @params[:dash], 'details', i].join "/" %>'>
-                    <img src='<%= [@top_level[@params[:category]].graphite_render, graph[:graphite][:url]].join "?" %>'></a>
+                    <img src='<%= [@top_level[@params[:category]].graphite_render, graph_url].join "?" %>'></a>
+
+
+
                 <% end %>
             <% end %>
             </td>

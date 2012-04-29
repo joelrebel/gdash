@@ -1,15 +1,29 @@
 <% unless @error %>
+<% if  params.empty? %>
+	<%= params["host"] = @hosts[0] %>
+	<h2>Dashboard for  <%= params[:host] %> </h2>
+<% end %>
+
+
+
 <%   @top_level.keys.sort.each do |key| %>
-<h2> <%= key.capitalize %> </h2>
+<h2> <%= key %> </h2>
+	
+	
+
 <table>
     <thead>
         <th width="30%">Name</th>
         <th width="70%">Description</th>
     </thead>
     <tbody>
-        <% @top_level[key].dashboards.sort_by{|b| b[:name]}.each do |board| %>
+          <% @top_level[key].dashboards.sort_by{|b| b[:name]}.each do |board| %>
         <tr>
-            <td><a href="<%= [@prefix, key, board[:link]].join('/') %>/"><%= board[:name] %></a></td><td><%= board[:description] %></td>
+	    <% if !params.empty? %>
+	          <td><a href="<%= [@prefix, key, board[:link], params[:host]].join('/') %>/"><%= board[:name] %></a></td><td><%= board[:description] %></td>
+	    <% else %>	  
+	          <td><a href="<%= [@prefix, key, board[:link]].join('/') %>/"><%= board[:name] %></a></td><td><%= board[:description] %></td>
+	    <% end %>
         </tr>
         <% end %>
     </tbody>
