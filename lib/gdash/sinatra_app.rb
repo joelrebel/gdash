@@ -154,10 +154,10 @@ class GDash
 
       erb :detailed_dashboard
     end
-        get '/:category/:dash/full/?*' do
+        get '/:category/:dash/:host/full/?*' do
       options = {}
       params["splat"] = params["splat"].first.split("/")
-
+	puts params["splat"].inspect
       params["columns"] = params["splat"][0].to_i || @graph_columns
 
       if params["splat"].size == 3

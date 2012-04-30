@@ -3,7 +3,6 @@
 <%= erb :_interval_filter, :layout => false unless @interval_filters.empty? %>
 <div class="row">
     <table>
-    <% puts 'inside -' + __FILE__ %>
     <% row = 1 %>
     <% grouped_graphs = @dashboard.graphs.in_groups_of(@graph_columns) %>
 
