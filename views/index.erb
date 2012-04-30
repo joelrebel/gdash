@@ -1,9 +1,9 @@
 <% unless @error %>
 <% if  params.empty? %>
 	<%= params["host"] = @hosts[0] %>
-	<h2>Dashboard for  <%= params[:host] %> </h2>
 <% end %>
 
+	<h2>Dashboard for <%= params[:host] %> </h2>
 
 
 <%   @top_level.keys.sort.each do |key| %>

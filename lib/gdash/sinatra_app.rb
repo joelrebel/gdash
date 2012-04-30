@@ -94,8 +94,9 @@ class GDash
     end
 
     get '/:category/:dash/:host/time/?*' do
+    puts "HERE"
     options = {}
-    #puts params.inspect
+
 
 	 params["splat"] = params["splat"].first.split("/")
      	 case params["splat"][0]
@@ -106,6 +107,7 @@ class GDash
 
       options.merge!(query_params)
 
+    #puts options.inspect
       if @top_level["#{params[:category]}"].list.include?(params[:dash])
         @dashboard = @top_level[@params[:category]].dashboard(params[:dash], options)
       else
@@ -130,7 +132,7 @@ class GDash
  #   end
 
     
-    get '/:category/:dash/details/:name' do
+    get '/:category/:dash/:host/details/:name' do
       if @top_level["#{params[:category]}"].list.include?(params[:dash])
         @dashboard = @top_level[@params[:category]].dashboard(params[:dash])
       else

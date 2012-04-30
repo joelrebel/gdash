@@ -3,6 +3,7 @@
 <%= erb :_interval_filter, :layout => false unless @interval_filters.empty? %>
 <div class="row">
     <table>
+    <% puts 'inside -' + __FILE__ %>
     <% row = 1 %>
     <% grouped_graphs = @dashboard.graphs.in_groups_of(@graph_columns) %>
     <% grouped_graphs.each do |graphs| %>
@@ -11,13 +12,13 @@
             <% i = grouped_graphs.rindex(graphs) * @graph_columns + graphs.rindex(graph) %>
             <td>
 	    <% if graph %>
-	        <%= graph_url = graph[:graphite][:url].gsub(/\$HOST/, params[:host]) %>
+	        <% graph_url = graph[:graphite][:url].gsub(/\$HOST/, params[:host]) %>
                 <% if graph[:graphite][:description] %>
-                    <a href='<%= [@prefix, params[:category], @params[:dash], 'details', i].join "/" %>'>
+                    <a href='<%= [@prefix, params[:category], @params[:dash], params[:host], 'details', i].join "/" %>'>
 
                     <img src='<%= [@top_level[@params[:category]].graphite_render, graph_url].join "?" %>' rel="<%= row == 1 ? 'popover-below' : 'popover-above' %>" title="<%= graph[:graphite][:title] %>" data-content="<%= graph[:graphite][:description] %>"></a>
                 <% else %>
-                    <a href='<%= [@prefix, params[:category], @params[:dash], 'details', i].join "/" %>'>
+                    <a href='<%= [@prefix, params[:category], @params[:dash], params[:host], 'details', i].join "/" %>'>
                     <img src='<%= [@top_level[@params[:category]].graphite_render, graph_url].join "?" %>'></a>
 
 
