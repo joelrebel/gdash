@@ -6,6 +6,7 @@
     <% puts 'inside -' + __FILE__ %>
     <% row = 1 %>
     <% grouped_graphs = @dashboard.graphs.in_groups_of(@graph_columns) %>
+
     <% grouped_graphs.each do |graphs| %>
         <tr>
         <% graphs.each do |graph| %>

@@ -94,21 +94,20 @@ class GDash
     end
 
     get '/:category/:dash/:host/time/?*' do
-    puts "HERE"
     options = {}
 
+#	puts params.inspect
+	#{"category"=>"system", "splat"=>["-1hour/now"], "captures"=>["system", "cpu_procs", "md-5", "-1hour/now"], "host"=>"md-5", "dash"=>"cpu_procs"}
+	#params["splat"]	 = params["splat"].split("/")
+	 params["splat"] = params["splat"][0].split("/")
 
-	 params["splat"] = params["splat"].first.split("/")
-     	 case params["splat"][0]
-        	when 'time'
-         	 options[:from] = params["splat"][1] || "-1hour"
-         	 options[:until] = params["splat"][2] || "now"
-       	 end
+         options[:from] = params["splat"][0] || "-1hour"
+         options[:until] = params["splat"][1] || "now"
 
       options.merge!(query_params)
 
-    #puts options.inspect
       if @top_level["#{params[:category]}"].list.include?(params[:dash])
+
         @dashboard = @top_level[@params[:category]].dashboard(params[:dash], options)
       else
         @error = "No dashboard called #{params[:dash]} found in #{params[:category]}/#{@top_level[params[:category]].list.join ','}."
