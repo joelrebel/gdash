@@ -29,7 +29,7 @@ class GDash
     options[:height] ||= @height
     options[:from] ||= @from
     options[:until] ||= @until
-
+  #  puts options.inspect
     Dashboard.new(name, dash_templates, options)
   end
 

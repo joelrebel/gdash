@@ -1,6 +1,6 @@
 class GDash
   class SinatraApp < ::Sinatra::Base
-    def initialize(graphite_base, graph_templates, options = {})
+    def initialize(graphite_base, graph_templates, hosts_file, options = {})
       # where the whisper data is
       @whisper_dir = options.delete(:whisper_dir) || "/var/lib/carbon/whisper"
 
@@ -36,6 +36,12 @@ class GDash
 
       @intervals = options.delete(:intervals) || []
 
+      hosts_file = File.dirname(__FILE__) + "/../../config/" + hosts_file
+      if File.exists?(hosts_file)
+      	#puts hosts_file
+      	@hosts = File.read(hosts_file).collect{|host| host.split(/\,/).collect{|h| h.strip.chomp} }.flatten	
+      end	
+
       @top_level = Hash.new
       Dir.entries(@graph_templates).each do |category|
         if File.directory?("#{@graph_templates}/#{category}")
@@ -64,7 +70,68 @@ class GDash
       erb :index
     end
 
-    get '/:category/:dash/details/:name' do
+    get '/:host' do
+      if @top_level.empty?
+        @error = "No dashboards found in the templates directory"
+      end
+
+      erb :index
+    end
+   
+    get '/:category/:dash/:host/' do
+    options = {}
+      options.merge!(query_params)
+
+      if @top_level["#{params[:category]}"].list.include?(params[:dash])
+        @dashboard = @top_level[@params[:category]].dashboard(params[:dash], options)
+      else
+        @error = "No dashboard called #{params[:dash]} found in #{params[:category]}/#{@top_level[params[:category]].list.join ','}."
+      end
+
+      erb :dashboard
+
+
+    end
+
+    get '/:category/:dash/:host/time/?*' do
+    options = {}
+
+#	puts params.inspect
+	#{"category"=>"system", "splat"=>["-1hour/now"], "captures"=>["system", "cpu_procs", "md-5", "-1hour/now"], "host"=>"md-5", "dash"=>"cpu_procs"}
+	#params["splat"]	 = params["splat"].split("/")
+	 params["splat"] = params["splat"][0].split("/")
+
+         options[:from] = params["splat"][0] || "-1hour"
+         options[:until] = params["splat"][1] || "now"
+
+      options.merge!(query_params)
+
+      if @top_level["#{params[:category]}"].list.include?(params[:dash])
+
+        @dashboard = @top_level[@params[:category]].dashboard(params[:dash], options)
+      else
+        @error = "No dashboard called #{params[:dash]} found in #{params[:category]}/#{@top_level[params[:category]].list.join ','}."
+      end
+
+      erb :dashboard
+
+
+    end
+
+#    get '/:category/:dash/debox/:host' do
+#	puts params[:host]
+#	 if @top_level["#{params[:category]}"].list.include?(params[:dash])
+#        	@dashboard = @top_level[@params[:category]].dashboard(params[:dash])
+#     	 else
+#        	@error = "No dashboard called #{params[:dash]} found in #{params[:category]}/#{@top_level[params[:category]].list.join ','}."
+#      end
+
+
+#	erb :host_dashboard
+ #   end
+
+    
+    get '/:category/:dash/:host/details/:name' do
       if @top_level["#{params[:category]}"].list.include?(params[:dash])
         @dashboard = @top_level[@params[:category]].dashboard(params[:dash])
       else
@@ -87,11 +154,10 @@ class GDash
 
       erb :detailed_dashboard
     end
-
-    get '/:category/:dash/full/?*' do
+        get '/:category/:dash/:host/full/?*' do
       options = {}
       params["splat"] = params["splat"].first.split("/")
-
+	puts params["splat"].inspect
       params["columns"] = params["splat"][0].to_i || @graph_columns
 
       if params["splat"].size == 3
@@ -113,26 +179,26 @@ class GDash
       erb :full_size_dashboard, :layout => false
     end
 
-    get '/:category/:dash/?*' do
-      options = {}
-      params["splat"] = params["splat"].first.split("/")
-
-      case params["splat"][0]
-        when 'time'
-          options[:from] = params["splat"][1] || "-1hour"
-          options[:until] = params["splat"][2] || "now"
-        end
-
-      options.merge!(query_params)
-
-      if @top_level["#{params[:category]}"].list.include?(params[:dash])
-        @dashboard = @top_level[@params[:category]].dashboard(params[:dash], options)
-      else
-        @error = "No dashboard called #{params[:dash]} found in #{params[:category]}/#{@top_level[params[:category]].list.join ','}."
-      end
-
-      erb :dashboard
-    end
+#    get '/:category/:dash/?*' do
+#      options = {}
+#      params["splat"] = params["splat"].first.split("/")
+#
+#      case params["splat"][0]
+#        when 'time'
+#          options[:from] = params["splat"][1] || "-1hour"
+#          options[:until] = params["splat"][2] || "now"
+#        end
+#
+#      options.merge!(query_params)
+#
+#      if @top_level["#{params[:category]}"].list.include?(params[:dash])
+#        @dashboard = @top_level[@params[:category]].dashboard(params[:dash], options)
+#      else
+#        @error = "No dashboard called #{params[:dash]} found in #{params[:category]}/#{@top_level[params[:category]].list.join ','}."
+#      end
+#
+#      erb :dashboard
+#    end
 
     get '/docs/' do
       markdown :README, :layout_engine => :erb
@@ -144,12 +210,16 @@ class GDash
       alias_method :h, :escape_html
 
       def link_to_interval(options)
-        "<a href=\"#{ [@prefix, params[:category], params[:dash], 'time', h(options[:from]), h(options[:to])].join('/') }\">#{ h(options[:label]) }</a>"
+	if !params[:host]
+	        "<a href=\"#{ [@prefix, params[:category], params[:dash], 'time', h(options[:from]), h(options[:to])].join('/') }\">#{ h(options[:label]) }</a>"
+	else
+	        "<a href=\"#{ [@prefix, params[:category], params[:dash], params[:host], 'time', h(options[:from]), h(options[:to])].join('/') }\">#{ h(options[:label]) }</a>"
+	end	
       end
 
       def query_params
         hash = {}
-        protected_keys = [:category, :dash, :splat]
+        protected_keys = [:category, :dash, :splat, :host]
 
         params.each do |k, v|
           hash[k.to_sym] = v unless protected_keys.include?(k.to_sym)
