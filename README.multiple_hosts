@@ -1,0 +1,73 @@
+This fork includes support for multiple hosts in gdash. its a complete hax set of patches (no tests included), on top of Volcane's very cool gdash.
+
+The fork attempts to replace '$HOST' (not a variable, just a placeholder) with the set of hosts defined in the config/hosts.csv file.
+It presents a dropdown with the defined hosts in hosts.csv, and lets the user select a host to view graphs for.
+
+Without multihost support, gdash needs the user to create multiple .graph files for each host .. this gets troublesome when one needs to display mulitple hosts with similar metrics.
+
+e.g: 
+(forked ascii art)
+
+        graph_templates
+	|
+	`host-1
+        |  `-- virtualization
+        |    |-- dom0
+        |    |   |-- dash.yaml
+        |    |   |-- iowait.graph
+        |    |   |-- load.graph
+        |    |   |-- system.graph
+        |    |   |-- threads.graph
+        |    |   `-- user.graph
+        |    `-- kvm1
+        |         |-- dash.yaml
+        |         |-- disk_read.graph
+        |         |-- disk_write.graph
+        |         |-- ssd_read.graph
+        |         `-- ssd_write.graph
+	`host-2
+          `-- virtualization
+            |-- dom0
+            |   |-- dash.yaml
+            |   |-- iowait.graph
+            |   |-- load.graph
+            |   |-- system.graph
+            |   |-- threads.graph
+            |   `-- user.graph
+            `-- kvm1
+                |-- dash.yaml
+                |-- disk_read.graph
+                |-- disk_write.graph
+                |-- ssd_read.graph
+                `-- ssd_write.graph
+
+
+this results in a lot of duplicate templates definitions for each host to be dash'd.
+
+To get multihost support running, 
+
+1. config/gdash.yaml needs to include a :hosts_file: <csv> definition.
+
+% cat config/gdash.yaml
+:graphite: http://graphite.setup.com
+:templatedir: graph_templates
+:hosts_file: hosts.csv
+
+2. include a config/hosts.csv is added which defines the list of hosts
+%cat config/hosts.csv 
+host1, host2, host3, host4
+
+3. the graphite url, under :data would need to include '$HOST' (as is, not a variable, just a placeholder) in the field that is expected to be the host. 
+
+%cat graph_templates/http/hourly/requests.graph
+title   "http requests served"
+area    :none
+vtitle  "http requests"
+from    "-2days"
+width   640
+height  480
+
+field :user,
+      :data  => "mostDeviant(10,project.$HOST.http.requests)",
+      :subgroup => 1
+
