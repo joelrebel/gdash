@@ -1,3 +1,8 @@
+Multihost support?
+=================
+view README.multiple_hosts
+
+
 What?
 =====
 
