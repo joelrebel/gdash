@@ -1,0 +1,10 @@
+title   "http requests served"
+area	:none
+vtitle  "http requests"
+from    "-2days"
+width   640
+height  480
+
+field :user,
+      :data  => "mostDeviant(10,project.$HOST.http.requests)",
+      :subgroup => 1
