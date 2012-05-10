@@ -1,6 +1,29 @@
 class GDash
   class SinatraApp < ::Sinatra::Base
-    def initialize(graphite_base, graph_templates, hosts_file, options = {})
+    def enum_hosts(query_target)
+	uri = '/metrics/find?'
+	query = 'format=completer&query=' + query_target
+	
+	request_url = @graphite_base + uri + query
+	puts request_url
+	url = request_url
+	uri = URI.parse(url)
+	http = Net::HTTP::new(uri.host, uri.port)
+	#http.use_ssl = false
+	req = Net::HTTP::Get.new(uri.request_uri)
+	response = http.request(req)
+	response = JSON.parse(response.body)
+	
+	hosts = Array.new
+	response.each_value { |arr|
+	        arr.each{|host| hosts.push( host["name"]) }
+	}
+	
+	hosts
+    end
+
+
+    def initialize(graphite_base, graph_templates, hosts_file, hosts_enum_metric, options = {})
       # where the whisper data is
       @whisper_dir = options.delete(:whisper_dir) || "/var/lib/carbon/whisper"
 
@@ -37,11 +60,14 @@ class GDash
       @intervals = options.delete(:intervals) || []
 
       hosts_file = File.dirname(__FILE__) + "/../../config/" + hosts_file
-      if File.exists?(hosts_file)
+     if File.exists?(hosts_file)
       	#puts hosts_file
-      	@hosts = File.read(hosts_file).collect{|host| host.split(/\,/).collect{|h| h.strip.chomp} }.flatten	
-      end	
-
+	@hosts = File.read(hosts_file).collect{|host| host.split(/\,/).collect{|h| h.strip.chomp} }.flatten	
+     else
+	@hosts = enum_hosts(hosts_enum_metric)
+	puts @hosts.inspect
+     end	
+      
       @top_level = Hash.new
       Dir.entries(@graph_templates).each do |category|
         if File.directory?("#{@graph_templates}/#{category}")

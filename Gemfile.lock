@@ -2,6 +2,7 @@ GEM
   remote: http://rubygems.org/
   specs:
     graphite_graph (0.0.1)
+    json (1.6.4)
     rack (1.4.1)
     rack-protection (1.2.0)
       rack
@@ -17,5 +18,6 @@ PLATFORMS
 
 DEPENDENCIES
   graphite_graph
+  json
   redcarpet
   sinatra

@@ -1,4 +1,5 @@
 source 'http://rubygems.org'
 gem 'sinatra'
 gem 'redcarpet'
+gem 'json'
 gem 'graphite_graph'

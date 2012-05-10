@@ -2,6 +2,7 @@ require 'rubygems'
 require 'sinatra'
 require 'yaml'
 require 'erb'
+require 'json'
 require 'redcarpet'
 
 class GDash
@@ -23,7 +24,8 @@ class GDash
 
     raise "Dashboard templates directory #{@dash_templates} does not exist" unless File.directory?(@dash_templates)
   end
-
+  
+  
   def dashboard(name, options={})
     options[:width] ||= @width
     options[:height] ||= @height

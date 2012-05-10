@@ -44,30 +44,47 @@ e.g:
 
 this results in a lot of duplicate templates definitions for each host to be dash'd.
 
-To get multihost support running, 
+To get multihost support running, we have two options - 
 
-1. config/gdash.yaml needs to include a :hosts_file: <csv> definition.
+1. CSV 
+2. enumerate hosts 
 
-% cat config/gdash.yaml
-:graphite: http://graphite.setup.com
-:templatedir: graph_templates
-:hosts_file: hosts.csv
+1. CSV
 
-2. include a config/hosts.csv is added which defines the list of hosts
-%cat config/hosts.csv 
-host1, host2, host3, host4
+ a. config/gdash.yaml needs to include a :hosts_file: <csv> definition.
+ 
+ % cat config/gdash.yaml
+ :graphite: http://graphite.setup.com
+ :templatedir: graph_templates
+ :hosts_file: hosts.csv
+ 
+ b. include a config/hosts.csv is added which defines the list of hosts
+ %cat config/hosts.csv 
+ host1, host2, host3, host4
+ 
+ c. the graphite url, under :data would need to include '$HOST' (as is, not a variable, just a placeholder) in the field that is expected to be the host. 
+ 
+ %cat graph_templates/http/hourly/requests.graph
+ title   "http requests served"
+ area    :none
+ vtitle  "http requests"
+ from    "-2days"
+ width   640
+ height  480
+ 
+ field :user,
+       :data  => "mostDeviant(10,project.$HOST.http.requests)",
+       :subgroup => 1
+ 	
+2. Enumerate Hosts - :hosts_enum_metric: config definition 
 
-3. the graphite url, under :data would need to include '$HOST' (as is, not a variable, just a placeholder) in the field that is expected to be the host. 
-
-%cat graph_templates/http/hourly/requests.graph
-title   "http requests served"
-area    :none
-vtitle  "http requests"
-from    "-2days"
-width   640
-height  480
-
-field :user,
-      :data  => "mostDeviant(10,project.$HOST.http.requests)",
-      :subgroup => 1
-
+ a. If Gdash doesnt find a hosts.csv, it will fall back and attempt to enumerate hosts,
+    host enumeration depends on correctly specifying the :hosts_enum_metric: in config/gdash.yaml.
+ 
+ b. The graphite tree, one is trying to enumerate hosts should have a field that is common across all metrics which specifies the host.. 
+    e.g: location.rack.(host1|host2|host3)
+    
+    If your graphite metrics tree looks like the above, the right value for :hosts_enum_metric should look like - location.rack.*, 
+    where * behaves like a wildcard and is passed as http://graphite.setup.com/metrics/find?format=json&query=location.rack.* 
+ 
+ c. The output of http://graphite.setup.com/metrics/find?format=json&query=location.rack.* is parsed by gdash and hostnames are then added to the drop downlist.   
