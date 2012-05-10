@@ -49,6 +49,8 @@ To get multihost support running, we have two options -
 1. CSV 
 2. enumerate hosts 
 
+
+
 1. CSV
 
  a. config/gdash.yaml needs to include a :hosts_file: <csv> definition.
@@ -77,8 +79,9 @@ To get multihost support running, we have two options -
        :subgroup => 1
  	
 2. Enumerate Hosts - :hosts_enum_metric: config definition 
+note: if a csv is found, gdash will default to using the csv and will ignore the :hosts_enum_metric: directive, this behaviour can be changed if found to be annoying
 
- a. If Gdash doesnt find a hosts.csv, it will fall back and attempt to enumerate hosts,
+a. If Gdash doesnt find a hosts.csv, it will fall back and attempt to enumerate hosts,
     host enumeration depends on correctly specifying the :hosts_enum_metric: in config/gdash.yaml.
  
  b. The graphite tree, one is trying to enumerate hosts should have a field that is common across all metrics which specifies the host.. 
